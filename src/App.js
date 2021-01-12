@@ -44,8 +44,7 @@ function App() {
   }
 
   async function deleteNote({ id, image }) {
-    const newNotesArray = notes.filter(note => note.id !== id);
-    setNotes(newNotesArray);
+    setNotes(notes => { return notes.filter(note => note.id !== id) });
     await API.graphql({ query: deleteNoteMutation, variables: { input: { id } } });
     await Storage.remove(image);
   }
@@ -54,18 +53,28 @@ function App() {
     <div className="App">
       <h1>My Notes App</h1>
       <input
-        onChange={e => setFormData({ ...formData, 'name': e.target.value })}
+        onChange={e => setFormData(formdata => {
+          return {
+            ...formdata,
+            'name': e.target.value
+          }
+        })}
         placeholder="Note name"
         value={formData.name}
       />
       <input
-        onChange={e => setFormData({ ...formData, 'description': e.target.value })}
+        onChange={e => setFormData(formdata => {
+          return {
+            ...formdata,
+            'description': e.target.value
+          }
+        })}
         placeholder="Note description"
         value={formData.description}
       />
       <input type="file" ref={imageInput} />
 
-      <button onClick={createNote}>Create Note</button>
+      <button onClick={createNote} disabled={!(formData.name && formData.description)}>Create Note</button>
       <div style={{ marginBottom: 30 }}>
         {
           notes.map(note => (
