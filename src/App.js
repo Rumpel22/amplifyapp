@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import { API, Storage } from 'aws-amplify';
-import { withAuthenticator, AmplifySignOut } from '@aws-amplify/ui-react';
+import { withAuthenticator, AmplifySignOut, AmplifyS3Image } from '@aws-amplify/ui-react';
 import { listNotes } from './graphql/queries';
 import { createNote as createNoteMutation, deleteNote as deleteNoteMutation } from './graphql/mutations';
 import { v4 as uuidv4 } from 'uuid';
@@ -20,12 +20,6 @@ function App() {
   async function fetchNotes() {
     const apiData = await API.graphql({ query: listNotes });
     const notesFromAPI = apiData.data.listNotes.items;
-    await Promise.all(notesFromAPI.map(async note => {
-      if (note.image) {
-        note.imageURL = await Storage.get(note.image);
-      }
-      return note;
-    }))
     setNotes(notesFromAPI);
   }
 
@@ -82,9 +76,7 @@ function App() {
               <h2>{note.name}</h2>
               <p>{note.description}</p>
               <button onClick={() => deleteNote(note)}>Delete note</button>
-              {
-                note.image && <img src={note.imageURL} style={{ width: 400 }} alt="" />
-              }
+              <AmplifyS3Image imgKey={note.image} style={{ "--width": "400px" }} />
             </div>
           ))
         }
